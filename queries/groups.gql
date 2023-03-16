@@ -1,0 +1,25 @@
+query test($numOfResults: Int, $after: String) {
+    groups(first: $numOfResults, after: $after) {
+        pageInfo {
+            endCursor
+            startCursor
+        }
+        nodes {
+            id
+            name
+            fullName
+            fullPath
+            description
+            projects {
+                nodes {
+                    id
+                    name
+                    description
+                    repository{
+                        rootRef
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,17 @@
+query example($project: ID!, $branch: String) {
+    project(fullPath: $project) {
+        id
+        name
+        path
+        fullPath
+        repository {
+            tree(recursive: true, ref: $branch) {
+                lastCommit {
+                    title
+                    authoredDate
+                    authorName
+                }
+            }
+        }
+    }
+}

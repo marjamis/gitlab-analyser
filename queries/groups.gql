@@ -15,6 +15,7 @@ query test($numOfResults: Int, $after: String) {
                     id
                     name
                     description
+                    fullPath
                     repository{
                         rootRef
                     }

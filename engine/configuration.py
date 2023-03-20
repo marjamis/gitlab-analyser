@@ -15,9 +15,12 @@ class Branch:
 
 
 class Project:
-    def __init__(self, id: str, name: str, description, primary_branch: str) -> None:
+    def __init__(
+        self, id: str, name: str, full_path: str, description, primary_branch: str
+    ) -> None:
         self.id = id
         self.name = name
+        self.full_path = full_path
         self.description = description
         self.primary_branch = primary_branch
         self.branches = []
@@ -39,3 +42,21 @@ class Group:
 
     def add_project(self, project: Project) -> None:
         self.projects.append(project)
+
+    def get_branch_details_csv_array(self):
+        branch_details = []
+
+        for project in self.projects:
+            for branch in project.branches:
+                branch_details.append(
+                    [
+                        self.name,
+                        project.name,
+                        branch.name,
+                        branch.last_commit.title,
+                        branch.last_commit.authored_date,
+                        branch.last_commit.author_name,
+                    ]
+                )
+
+        return branch_details

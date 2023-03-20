@@ -13,7 +13,7 @@ helper: # Adapted from: https://marmelab.com/blog/2016/02/29/auto-documented-mak
 command:
 	echo "Application run: $(OPTIONS)"
 	# TODO add a check for the GILAB_TOKEN env
-	GITLAB_SERVER="http://localhost:8080/api/graphql" python engine/main.py
+	GITLAB_SERVER="http://localhost:8080/api/graphql" python main.py
 
 test: ## Builds and then runs tests against the application
 

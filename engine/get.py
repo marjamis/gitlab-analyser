@@ -24,9 +24,7 @@ def get_data(output_pickle_filename):
 
     groups_result = client.execute(
         groups_gq,
-        variable_values={
-            "numOfResults": 2,
-        },
+        variable_values={},
     )
 
     for group in groups_result["groups"]["nodes"]:

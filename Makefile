@@ -6,6 +6,8 @@ TEXT_BLUE = \033[0;34;1m
 TEXT_GREEN = \033[0;32;1m
 TEXT_NOCOLOR = \033[0m
 
+GITLAB_HOME = ./data/gitlab_home
+
 helper: # Adapted from: https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 	@echo "Available targets..." # @ will not output shell command part to stdout that Makefiles normally do but will execute and display the output.
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -23,7 +25,24 @@ prod: ## Runs the prod version of the application
 dev: ## Runs a dev version of the application
 	$(MAKE) command
 
+generate-report: ## Runs the jupyter notebook and generates the resultant repot
+	jupyter nbconvert --to html --no-input --output ./data/analysis.html ./analysis.ipynb
+
 gitlab: ## Start the sample gitlab to be used for development work
-	# TODO
+	mkdir -p $(GITLAB_HOME)
+	docker run --detach \
+	--hostname gitlab:8080 \
+	--publish 8443:443 \
+	--publish 8080:80 \
+	--publish 8022:22  \
+	--name gitlab \
+	--restart always \
+	--shm-size 256m \
+	--volume $(shell pwd)/$(GITLAB_HOME)/config:/etc/gitlab:Z \
+	--volume $(shell pwd)/$(GITLAB_HOME)/logs:/var/log/gitlab:Z \
+	--volume $(shell pwd)/$(GITLAB_HOME)/data:/var/opt/gitlab:Z \
+	gitlab/gitlab-ee:latest
+
+	echo "To get the root password run: docker exec -it gitlab grep 'Password:' /etc/gitlab/initial_root_password"
 
 clean: ## Cleans up any old/unneeded items

@@ -1,3 +1,6 @@
+from typing import List
+
+
 class Commit:
     def __init__(self, title: str, authored_date: str, author_name: str) -> None:
         self.title = title
@@ -10,8 +13,11 @@ class Branch:
         self.name = name
         self.last_commit = None
 
-    def set_last_commit(self, last_commit: Commit):
+    def set_last_commit(self, last_commit: Commit) -> None:
         self.last_commit = last_commit
+
+    def get_last_commit(self) -> Commit:
+        return self.last_commit
 
 
 class Project:
@@ -28,6 +34,9 @@ class Project:
     def add_branch(self, branch: Branch) -> None:
         self.branches.append(branch)
 
+    def get_branches(self) -> List[Branch]:
+        return self.branches
+
 
 class Group:
     def __init__(
@@ -43,20 +52,5 @@ class Group:
     def add_project(self, project: Project) -> None:
         self.projects.append(project)
 
-    def get_branch_details_csv_array(self):
-        branch_details = []
-
-        for project in self.projects:
-            for branch in project.branches:
-                branch_details.append(
-                    [
-                        self.name,
-                        project.name,
-                        branch.name,
-                        branch.last_commit.title,
-                        branch.last_commit.authored_date,
-                        branch.last_commit.author_name,
-                    ]
-                )
-
-        return branch_details
+    def get_projects(self) -> List[Project]:
+        return self.projects

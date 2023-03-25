@@ -13,8 +13,11 @@ helper: # Adapted from: https://marmelab.com/blog/2016/02/29/auto-documented-mak
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 command:
+ifeq ($(origin GITLAB_TOKEN), undefined)
+		echo "Required GILAB_TOKEN environment variable missing"
+		exit 1
+endif
 	echo "Application run: $(OPTIONS)"
-	# TODO add a check for the GILAB_TOKEN env
 	GITLAB_SERVER="http://localhost:8080/api/graphql" python main.py
 
 test: ## Builds and then runs tests against the application

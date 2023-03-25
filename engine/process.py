@@ -4,7 +4,7 @@ import os
 import csv
 
 
-def get_csv_rows(self, groups) -> None:
+def get_csv_rows(groups) -> None:
     branch_details = [
         [
             "Group Name",
@@ -18,7 +18,7 @@ def get_csv_rows(self, groups) -> None:
 
     for group in groups:
         for project in group.get_projects():
-            for branch in project.get_branches:
+            for branch in project.get_branches():
                 last_commit = branch.get_last_commit()
                 branch_details.append(
                     [

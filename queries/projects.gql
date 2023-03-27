@@ -4,8 +4,27 @@ query ($fullPath: ID!) {
         name
         path
         fullPath
+
         repository {
             branchNames(limit: 100, searchPattern: "*", offset: 0)
+        }
+
+        pipelineSchedules {
+            edges {
+                node {
+                    id
+                    description
+                    active
+                    nextRunAt
+
+                    owner {
+                        id
+                        username
+                        publicEmail
+                        state
+                    }
+                }
+            }
         }
     }
 }

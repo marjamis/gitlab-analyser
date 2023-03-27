@@ -1,10 +1,8 @@
-from engine.configuration import Branch, Commit, Group, Project
 import pickle
-import os
 import csv
 
 
-def get_csv_rows(groups) -> None:
+def get_csv_rows_branches(groups) -> None:
     branch_details = [
         [
             "Group Name",
@@ -34,16 +32,63 @@ def get_csv_rows(groups) -> None:
     return branch_details
 
 
-def create_csv_output(input_pickle_file: str, output_csv_filename: str):
+def get_csv_rows_pipeline_schedules(groups) -> None:
+    pipeline_schedule_details = [
+        [
+            "Group Name",
+            "Project Name",
+            "Pipeline Schedule Id",
+            "Pipeline Schedule Description",
+            "Pipeline Schedule Is Active?",
+            "Pipeline Schedule Next Run At",
+            "Pipeline Schedule Owner Id",
+            "Pipeline Schedule Owner Username",
+            "Pipeline Schedule Owner Public Email",
+            "Pipeline Schedule Owner State",
+        ]
+    ]
+
+    for group in groups:
+        for project in group.get_projects():
+            for pipeline_schedule in project.get_pipeline_schedules():
+                pipeline_schedule_details.append(
+                    [
+                        group.name,
+                        project.name,
+                        pipeline_schedule.id,
+                        pipeline_schedule.description,
+                        pipeline_schedule.active,
+                        pipeline_schedule.next_run_at,
+                        pipeline_schedule.owner.id,
+                        pipeline_schedule.owner.username,
+                        pipeline_schedule.owner.public_email,
+                        pipeline_schedule.owner.state,
+                    ]
+                )
+
+    return pipeline_schedule_details
+
+
+def create_csv_outputs(
+    input_pickle_file: str, branches_csv: str = None, pipeline_schedules_csv: str = None
+) -> None:
     try:
         file = open(input_pickle_file, "rb")
         groups = pickle.load(file)
 
-        with open(output_csv_filename, "w") as csv_file:
-            csv_writer = csv.writer(csv_file)
+        if branches_csv is not None:
+            with open(branches_csv, "w") as csv_file:
+                csv_writer = csv.writer(csv_file)
 
-            for row in get_csv_rows(groups):
-                csv_writer.writerow(row)
+                for row in get_csv_rows_branches(groups):
+                    csv_writer.writerow(row)
+
+        if pipeline_schedules_csv is not None:
+            with open(pipeline_schedules_csv, "w") as csv_file:
+                csv_writer = csv.writer(csv_file)
+
+                for row in get_csv_rows_pipeline_schedules(groups):
+                    csv_writer.writerow(row)
 
     except Exception as e:
         print(f"There has been an exception of: {e}")

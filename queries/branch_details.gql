@@ -1,11 +1,11 @@
-query example($project: ID!, $branch: String) {
-    project(fullPath: $project) {
+query ($projectFullPath: ID!, $branchName: String) {
+    project(fullPath: $projectFullPath) {
         id
         name
         path
         fullPath
         repository {
-            tree(recursive: true, ref: $branch) {
+            tree(recursive: true, ref: $branchName) {
                 lastCommit {
                     title
                     authoredDate

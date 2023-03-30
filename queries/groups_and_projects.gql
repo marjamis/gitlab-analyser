@@ -1,8 +1,9 @@
-query test($numOfResults: Int, $after: String) {
+query ($numOfResults: Int, $after: String) {
     groups(first: $numOfResults, after: $after) {
         pageInfo {
             endCursor
             startCursor
+            hasNextPage
         }
         nodes {
             id

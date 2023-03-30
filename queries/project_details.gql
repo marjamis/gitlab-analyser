@@ -1,5 +1,5 @@
-query ($fullPath: ID!) {
-    project(fullPath: $fullPath) {
+query ($projectFullPath: ID!) {
+    project(fullPath: $projectFullPath) {
         id
         name
         path

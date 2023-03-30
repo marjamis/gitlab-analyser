@@ -1,8 +1,10 @@
 import pickle
 import csv
 
+from typing import List
 
-def get_csv_rows_branches(groups) -> None:
+
+def get_csv_rows_branches(groups) -> List[List[str]]:
     branch_details = [
         [
             "Group Name",
@@ -32,7 +34,7 @@ def get_csv_rows_branches(groups) -> None:
     return branch_details
 
 
-def get_csv_rows_pipeline_schedules(groups) -> None:
+def get_csv_rows_pipeline_schedules(groups) -> List[List[str]]:
     pipeline_schedule_details = [
         [
             "Group Name",
@@ -69,9 +71,7 @@ def get_csv_rows_pipeline_schedules(groups) -> None:
     return pipeline_schedule_details
 
 
-def create_csv_outputs(
-    input_pickle_file: str, branches_csv: str = None, pipeline_schedules_csv: str = None
-) -> None:
+def create_csv_outputs(input_pickle_file: str, branches_csv: str = None, pipeline_schedules_csv: str = None) -> None:
     try:
         file = open(input_pickle_file, "rb")
         groups = pickle.load(file)

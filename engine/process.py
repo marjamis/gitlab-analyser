@@ -1,3 +1,7 @@
+"""
+Processes the provided files and generates CSV outputs.
+"""
+
 import pickle
 import csv
 
@@ -5,6 +9,10 @@ from typing import List
 
 
 def get_csv_rows_branches(groups) -> List[List[str]]:
+    """
+    Generates the CSV rows for branches across all the provided GitLab groups.
+    """
+
     branch_details = [
         [
             "Group Name",
@@ -35,6 +43,10 @@ def get_csv_rows_branches(groups) -> List[List[str]]:
 
 
 def get_csv_rows_pipeline_schedules(groups) -> List[List[str]]:
+    """
+    Generates the CSV rows for pipeline schedules across all the provided GitLab groups.
+    """
+
     pipeline_schedule_details = [
         [
             "Group Name",
@@ -71,7 +83,13 @@ def get_csv_rows_pipeline_schedules(groups) -> List[List[str]]:
     return pipeline_schedule_details
 
 
-def create_csv_outputs(input_pickle_file: str, branches_csv: str = None, pipeline_schedules_csv: str = None) -> None:
+def create_csv_outputs(
+    input_pickle_file: str, branches_csv: str | None = None, pipeline_schedules_csv: str | None = None
+) -> None:
+    """
+    Creates CSV outputs from the supplied file/s.
+    """
+
     try:
         file = open(input_pickle_file, "rb")
         groups = pickle.load(file)

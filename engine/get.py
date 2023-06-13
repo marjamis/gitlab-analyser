@@ -1,3 +1,7 @@
+"""
+Gets data from GitLab and produces objects with the data.
+"""
+
 import pickle
 import os
 from typing import List, Dict, Any
@@ -8,35 +12,54 @@ from gql.transport.aiohttp import AIOHTTPTransport
 from engine.configuration import Branch, Commit, Group, Project, PipelineSchedule, User
 
 # TODO Improve opening off these, such as with a context manager and proper error checking
-groups_and_projects_query = gql(open("queries/groups_and_projects.gql", "r").read())
-project_details_query = gql(open("queries/project_details.gql", "r").read())
-branch_details_query = gql(open("queries/branch_details.gql", "r").read())
+groups_and_projects_query = open("queries/groups_and_projects.gql", "r").read()
+project_details_query = open("queries/project_details.gql", "r").read()
+branch_details_query = open("queries/branch_details.gql", "r").read()
 
 
 def create_gitlab_client() -> Client:
+    """
+    Creates a GitLab GraphQL Client.
+    """
+
+    url = os.getenv("GITLAB_SERVER")
+    if url is None:
+        raise Exception("TODO")
+    token = os.getenv("GITLAB_TOKEN")
+    if token is None:
+        raise Exception("TODO")
+
     transport = AIOHTTPTransport(
-        url=os.getenv("GITLAB_SERVER"),
+        url=url,
         headers={
-            "PRIVATE-TOKEN": os.getenv("GITLAB_TOKEN"),
+            "PRIVATE-TOKEN": token,
         },
     )
 
     return Client(transport=transport, fetch_schema_from_transport=True)
 
 
-def make_query(client: Client, query: gql, variables: dict = None) -> Dict[str, Any]:
+def make_query(client: Client, query: str, variables: dict | None = None) -> Dict[str, Any]:
+    """
+    Wrapper to make a GitLab GraphQL query.
+    """
+
     return client.execute(
-        query,
+        gql(query),
         variable_values=variables,
     )
 
 
 def create_groups_and_projects(groups_result: Dict[str, Any]) -> List[Group]:
+    """
+    Creates the objects project groups and projects.
+    """
+
     groups = []
 
     for group in groups_result["groups"]["nodes"]:
         new_group = Group(
-            id=group["id"],
+            group_id=group["id"],
             name=group["name"],
             full_name=group["fullName"],
             full_path=group["fullPath"],
@@ -45,7 +68,7 @@ def create_groups_and_projects(groups_result: Dict[str, Any]) -> List[Group]:
 
         for project in group["projects"]["nodes"]:
             new_project = Project(
-                id=project["id"],
+                project_id=project["id"],
                 name=project["name"],
                 full_path=project["fullPath"],
                 description=project["description"],
@@ -60,10 +83,18 @@ def create_groups_and_projects(groups_result: Dict[str, Any]) -> List[Group]:
 
 
 def create_branch(branch_name: str) -> Branch:
+    """
+    Creates an object for a branch.
+    """
+
     return Branch(name=branch_name)
 
 
-def create_branch_details(branch: Branch, branch_details: Dict[str, Any]):
+def update_branch_details(branch: Branch, branch_details: Dict[str, Any]):
+    """
+    Updates a branch with relevant details.
+    """
+
     try:
         ref = branch_details["project"]["repository"]["tree"]["lastCommit"]
         branch.set_last_commit(
@@ -78,16 +109,20 @@ def create_branch_details(branch: Branch, branch_details: Dict[str, Any]):
 
 
 def create_pipeline_schedule(pipeline_schedule: Dict[str, Any]) -> PipelineSchedule:
+    """
+    Creates an object for a pipelines schedule.
+    """
+
     node = pipeline_schedule["node"]
     owner = pipeline_schedule["node"]["owner"]
 
     return PipelineSchedule(
-        id=node["id"],
+        pipeline_schedule_id=node["id"],
         description=node["description"],
         active=node["active"],
         next_run_at=node["nextRunAt"],
         owner=User(
-            id=owner["id"],
+            user_id=owner["id"],
             username=owner["username"],
             public_email=owner["publicEmail"],
             state=owner["state"],
@@ -95,7 +130,11 @@ def create_pipeline_schedule(pipeline_schedule: Dict[str, Any]) -> PipelineSched
     )
 
 
-def create_project_details(project: Project, project_details: Dict[str, Any]) -> None:
+def update_project_details(project: Project, project_details: Dict[str, Any]) -> None:
+    """
+    Updates a project with relevant details.
+    """
+
     for branch_name in project_details["project"]["repository"]["branchNames"]:
         project.add_branch(create_branch(branch_name))
 
@@ -104,6 +143,10 @@ def create_project_details(project: Project, project_details: Dict[str, Any]) ->
 
 
 def pickle_and_save(output_pickle_filename: str, groups: List[Group]) -> None:
+    """
+    Pickles the list of GitLab groups and saves the pickle locally.
+    """
+
     file = open(output_pickle_filename, "wb")
     pickle.dump(groups, file)
 
@@ -113,7 +156,11 @@ def get_value(results: Dict[str, Any], key: str) -> Any:
     return results["groups"]["pageInfo"][key]
 
 
-def get_data(output_pickle_filename: str) -> None:
+def workflow(output_pickle_filename: str) -> None:
+    """
+    Makes all the relevant calls to connect to the server and save out the data.
+    """
+
     client = create_gitlab_client()
 
     # TODO deal with pagination in each query and make it more seamless than here
@@ -146,7 +193,7 @@ def get_data(output_pickle_filename: str) -> None:
                 },
             )
 
-            create_project_details(project, project_details)
+            update_project_details(project, project_details)
 
     for group in groups:
         for project in group.projects:
@@ -160,6 +207,6 @@ def get_data(output_pickle_filename: str) -> None:
                     },
                 )
 
-                create_branch_details(branch, branch_details)
+                update_branch_details(branch, branch_details)
 
     pickle_and_save(output_pickle_filename, groups)

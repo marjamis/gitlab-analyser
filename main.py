@@ -1,7 +1,7 @@
 import engine.process as process
 import engine.get as get
 
-get.get_data(
+get.workflow(
     "./data/data.pickle",
 )
 

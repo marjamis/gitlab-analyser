@@ -69,7 +69,7 @@ ptyprocess==0.7.0
 pure-eval==0.2.2
 pycodestyle==2.10.0
 pyflakes==3.0.1
-Pygments==2.14.0
+Pygments==2.15.0
 pylint==2.17.1
 pyparsing==3.0.9
 pyrsistent==0.19.3

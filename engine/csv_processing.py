@@ -7,8 +7,10 @@ import csv
 
 from typing import List
 
+from engine.types import Data
 
-def get_csv_rows_branches(groups) -> List[List[str]]:
+
+def get_csv_rows_branches(data: Data) -> List[List[str]]:
     """
     Generates the CSV rows for branches across all the provided GitLab groups.
     """
@@ -24,25 +26,24 @@ def get_csv_rows_branches(groups) -> List[List[str]]:
         ]
     ]
 
-    for group in groups:
-        for project in group.get_projects():
-            for branch in project.get_branches():
-                last_commit = branch.get_last_commit()
+    for group in data.groups:
+        for project in group.group_projects:
+            for branch in project.branches:
                 branch_details.append(
                     [
                         group.name,
                         project.name,
                         branch.name,
-                        last_commit.title,
-                        last_commit.authored_date,
-                        last_commit.author_name,
+                        branch.lastCommit.title,
+                        branch.lastCommit.authoredDate,
+                        branch.lastCommit.authorName,
                     ]
                 )
 
     return branch_details
 
 
-def get_csv_rows_pipeline_schedules(groups) -> List[List[str]]:
+def get_csv_rows_pipeline_schedules(data: Data) -> List[List[str]]:
     """
     Generates the CSV rows for pipeline schedules across all the provided GitLab groups.
     """
@@ -62,20 +63,20 @@ def get_csv_rows_pipeline_schedules(groups) -> List[List[str]]:
         ]
     ]
 
-    for group in groups:
-        for project in group.get_projects():
-            for pipeline_schedule in project.get_pipeline_schedules():
+    for group in data.groups:
+        for project in group.group_projects:
+            for pipeline_schedule in project.pipelineSchedules:
                 pipeline_schedule_details.append(
                     [
                         group.name,
                         project.name,
                         pipeline_schedule.id,
                         pipeline_schedule.description,
-                        pipeline_schedule.active,
-                        pipeline_schedule.next_run_at,
+                        str(pipeline_schedule.active),
+                        pipeline_schedule.nextRunAt,
                         pipeline_schedule.owner.id,
                         pipeline_schedule.owner.username,
-                        pipeline_schedule.owner.public_email,
+                        pipeline_schedule.owner.publicEmail,
                         pipeline_schedule.owner.state,
                     ]
                 )

@@ -9,7 +9,7 @@ from typing import List, Dict, Any
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 
-from engine.configuration import Branch, Commit, Group, Project, PipelineSchedule, User
+from engine.types import Branch, Commit, Group, Project, PipelineSchedule, User
 
 # TODO Improve opening off these, such as with a context manager and proper error checking
 groups_and_projects_query = open("queries/groups_and_projects.gql", "r").read()
@@ -22,12 +22,12 @@ def create_gitlab_client() -> Client:
     Creates a GitLab GraphQL Client.
     """
 
-    url = os.getenv("GITLAB_SERVER")
+    url = os.getenv("GITLAB_GRAPHQL_ENDPOINT")
     if url is None:
-        raise Exception("TODO")
+        raise Exception("GITLAB_GRAPHQL_ENDPOINT environment variable not specified")
     token = os.getenv("GITLAB_TOKEN")
     if token is None:
-        raise Exception("TODO")
+        raise Exception("GITLAB_TOKEN environment variable not specified")
 
     transport = AIOHTTPTransport(
         url=url,

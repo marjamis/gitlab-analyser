@@ -18,7 +18,7 @@ ifeq ($(origin GITLAB_TOKEN), undefined)
 		exit 1
 endif
 	echo "Application run: $(OPTIONS)"
-	GITLAB_SERVER="http://localhost:8080/api/graphql" python main.py
+	GITLAB_GRAPHQL_ENDPOINT="http://localhost:8080/api/graphql" python main.py
 
 test: ## Builds and then runs tests against the application
 
@@ -44,7 +44,7 @@ gitlab: ## Start the sample gitlab to be used for development work
 	--volume $(shell pwd)/$(GITLAB_HOME)/config:/etc/gitlab:Z \
 	--volume $(shell pwd)/$(GITLAB_HOME)/logs:/var/log/gitlab:Z \
 	--volume $(shell pwd)/$(GITLAB_HOME)/data:/var/opt/gitlab:Z \
-	gitlab/gitlab-ee:latest
+	gitlab/gitlab-ce:16.1.5-ce.0
 
 	echo "To get the root password run: docker exec -it gitlab grep 'Password:' /etc/gitlab/initial_root_password"
 

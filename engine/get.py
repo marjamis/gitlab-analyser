@@ -68,15 +68,14 @@ def get_value(results: Dict[str, Any], key: str) -> Any:
     return results["groups"]["pageInfo"][key]
 
 
-def workflow(output_pickle_filename: str) -> None:
-    """
-    Makes all the relevant calls to connect to the server and save out the data.
-    """
+def get_groups_and_projects(client: Client, data: Data):
+    """Gets the groups and project details.
 
-    client = create_gitlab_client()
-
+    Args:
+        client (Client): The GitLab client
+        data (Data): The data structure that stores all the found GitLab information
+    """
     # TODO deal with pagination in each query and make it more seamless than here
-    data = Data()
     has_next_page = True
     after = ""
     while has_next_page:
@@ -102,6 +101,14 @@ def workflow(output_pickle_filename: str) -> None:
         else:
             has_next_page = False
 
+
+def get_additional_project_details(client: Client, data: Data):
+    """Gets additional project details.
+
+    Args:
+        client (Client): The GitLab client
+        data (Data): The data structure that stores all the found GitLab information
+    """
     for group in data.groups:
         for project in group.group_projects:
             project_details = make_query(
@@ -118,6 +125,14 @@ def workflow(output_pickle_filename: str) -> None:
             for schedule in project_details["project"]["pipelineSchedules"]["edges"]:
                 project.pipelineSchedules.append(PipelineSchedule(**schedule["node"]))
 
+
+def get_additional_branch_details(client: Client, data: Data):
+    """Gets additional branch details.
+
+    Args:
+        client (Client): The GitLab client
+        data (Data): The data structure that stores all the found GitLab information
+    """
     for group in data.groups:
         for project in group.group_projects:
             for branch in project.branches:
@@ -131,5 +146,19 @@ def workflow(output_pickle_filename: str) -> None:
                 )
 
                 branch.lastCommit = Commit(**branch_details["project"]["repository"]["tree"]["lastCommit"])
+
+
+def workflow(output_pickle_filename: str) -> None:
+    """
+    Workflow for all the relevant calls to connect to the server and save out the data.
+    """
+
+    client = create_gitlab_client()
+    data = Data()
+
+    # Collect the required data
+    get_groups_and_projects(client=client, data=data)
+    get_additional_project_details(client=client, data=data)
+    get_additional_branch_details(client=client, data=data)
 
     pickle_and_save(output_pickle_filename, data)

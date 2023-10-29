@@ -7,6 +7,7 @@ get.workflow(
 
 csv_processing.create_csv_outputs(
     "./data/data.pickle",
-    branches_csv="./data/output.csv",
+    branches_csv="./data/branches.csv",
     pipeline_schedules_csv="./data/schedules.csv",
+    projects_csv="./data/projects.csv",
 )

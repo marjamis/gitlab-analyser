@@ -32,7 +32,7 @@ generate-report: ## Runs the jupyter notebook and generates the resultant repot
 	jupyter nbconvert --to html --no-input --output ./data/analysis.html ./analysis.ipynb
 
 gitlab: ## Start the sample gitlab to be used for development work
-	mkdir -p $(GITLAB_HOME)
+	docker start gitlab || mkdir -p $(GITLAB_HOME) && \
 	docker run --detach \
 	--hostname gitlab \
 	--publish 8443:443 \
@@ -43,8 +43,7 @@ gitlab: ## Start the sample gitlab to be used for development work
 	--volume $(shell pwd)/$(GITLAB_HOME)/config:/etc/gitlab \
 	--volume $(shell pwd)/$(GITLAB_HOME)/logs:/var/log/gitlab \
 	--volume $(shell pwd)/$(GITLAB_HOME)/data:/var/opt/gitlab \
-	gitlab/gitlab-ce:16.1.5-ce.0
-
+	gitlab/gitlab-ce:16.1.5-ce.0 && \
 	echo "To get the root password run: docker exec -it gitlab grep 'Password:' /etc/gitlab/initial_root_password"
 
 clean: ## Cleans up any old/unneeded items

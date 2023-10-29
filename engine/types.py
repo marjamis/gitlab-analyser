@@ -13,7 +13,7 @@ class User(BaseModel):
 
     id: str
     username: str
-    publicEmail: str
+    publicEmail: str | None = ""
     state: str
 
 
@@ -48,6 +48,10 @@ class Branch(BaseModel):
     lastCommit: Commit = Commit(title="", authoredDate="", authorName="")
 
 
+class RepositoryDetails(BaseModel):
+    rootRef: str
+
+
 class Project(BaseModel):
     """
     Type for a GitLab Project.
@@ -55,13 +59,18 @@ class Project(BaseModel):
 
     id: str
     name: str
-    description: str | None
+    description: str | None = ""
     fullPath: str
+    repository: RepositoryDetails
+    # TODO computed branch that points to this for primary_branch?
 
     # Custom components
-    primaryBranch: Branch
     branches: List[Branch] = []
     pipelineSchedules: List[PipelineSchedule] = []
+
+
+class Projects(BaseModel):
+    nodes: List[Project] = []
 
 
 class Group(BaseModel):
@@ -74,9 +83,11 @@ class Group(BaseModel):
     fullName: str
     fullPath: str
     description: str
+    projects: Projects = Projects()
 
-    # Custom components
-    group_projects: List[Project] = []
+
+class Groups(BaseModel):
+    nodes: List[Group] = []
 
 
 class Data(BaseModel):
@@ -84,4 +95,4 @@ class Data(BaseModel):
     Type for a list of GitLab Project Groups.
     """
 
-    groups: List[Group] = []
+    groups: Groups = Groups()

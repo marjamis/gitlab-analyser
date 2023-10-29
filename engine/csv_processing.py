@@ -10,6 +10,32 @@ from typing import List
 from engine.types import Data
 
 
+def get_csv_rows_projects(data: Data) -> List[List[str]]:
+    """
+    Generates the CSV rows for projects across all the provided GitLab groups.
+    """
+
+    project_details = [
+        [
+            "Group Name",
+            "Project Name",
+            "Primary Branch Name",
+        ]
+    ]
+
+    for group in data.groups.nodes:
+        for project in group.projects.nodes:
+            project_details.append(
+                [
+                    group.name,
+                    project.name,
+                    project.repository.rootRef,
+                ]
+            )
+
+    return project_details
+
+
 def get_csv_rows_branches(data: Data) -> List[List[str]]:
     """
     Generates the CSV rows for branches across all the provided GitLab groups.
@@ -26,8 +52,8 @@ def get_csv_rows_branches(data: Data) -> List[List[str]]:
         ]
     ]
 
-    for group in data.groups:
-        for project in group.group_projects:
+    for group in data.groups.nodes:
+        for project in group.projects.nodes:
             for branch in project.branches:
                 branch_details.append(
                     [
@@ -63,8 +89,8 @@ def get_csv_rows_pipeline_schedules(data: Data) -> List[List[str]]:
         ]
     ]
 
-    for group in data.groups:
-        for project in group.group_projects:
+    for group in data.groups.nodes:
+        for project in group.projects.nodes:
             for pipeline_schedule in project.pipelineSchedules:
                 pipeline_schedule_details.append(
                     [
@@ -85,7 +111,10 @@ def get_csv_rows_pipeline_schedules(data: Data) -> List[List[str]]:
 
 
 def create_csv_outputs(
-    input_pickle_file: str, branches_csv: str | None = None, pipeline_schedules_csv: str | None = None
+    input_pickle_file: str,
+    branches_csv: str | None = None,
+    pipeline_schedules_csv: str | None = None,
+    projects_csv: str | None = None,
 ) -> None:
     """
     Creates CSV outputs from the supplied file/s.
@@ -107,6 +136,13 @@ def create_csv_outputs(
                 csv_writer = csv.writer(csv_file)
 
                 for row in get_csv_rows_pipeline_schedules(groups):
+                    csv_writer.writerow(row)
+
+        if projects_csv is not None:
+            with open(projects_csv, "w") as csv_file:
+                csv_writer = csv.writer(csv_file)
+
+                for row in get_csv_rows_projects(groups):
                     csv_writer.writerow(row)
 
     except Exception as e:

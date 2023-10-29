@@ -87,14 +87,7 @@ def get_groups_and_projects(client: Client, data: Data):
             },
         )
 
-        for node in results["groups"]["nodes"]:
-            ng = Group(**node)
-            for project in node["projects"]["nodes"]:
-                primary_branch = Branch(name=project["repository"]["rootRef"])
-                new_project = Project(**project, primaryBranch=primary_branch)
-                ng.group_projects.append(new_project)
-
-            data.groups.append(ng)
+        data.groups.nodes += Data(**results).groups.nodes
 
         if get_value(results, "hasNextPage"):
             after = get_value(results, "endCursor")
@@ -109,8 +102,8 @@ def get_additional_project_details(client: Client, data: Data):
         client (Client): The GitLab client
         data (Data): The data structure that stores all the found GitLab information
     """
-    for group in data.groups:
-        for project in group.group_projects:
+    for group in data.groups.nodes:
+        for project in group.projects.nodes:
             project_details = make_query(
                 client,
                 project_details_query,
@@ -119,6 +112,7 @@ def get_additional_project_details(client: Client, data: Data):
                 },
             )
 
+            # TODO make into a pydantic type as well for easy referencings?
             for branch in project_details["project"]["repository"]["branchNames"]:
                 project.branches.append(Branch(name=branch))
 
@@ -133,8 +127,8 @@ def get_additional_branch_details(client: Client, data: Data):
         client (Client): The GitLab client
         data (Data): The data structure that stores all the found GitLab information
     """
-    for group in data.groups:
-        for project in group.group_projects:
+    for group in data.groups.nodes:
+        for project in group.projects.nodes:
             for branch in project.branches:
                 branch_details = make_query(
                     client,
@@ -161,4 +155,5 @@ def workflow(output_pickle_filename: str) -> None:
     get_additional_project_details(client=client, data=data)
     get_additional_branch_details(client=client, data=data)
 
+    print(data.model_dump_json(indent=4))
     pickle_and_save(output_pickle_filename, data)

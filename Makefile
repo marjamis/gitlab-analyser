@@ -17,16 +17,23 @@ ifeq ($(origin GITLAB_TOKEN), undefined)
 		echo "Required GILAB_TOKEN environment variable missing"
 		exit 1
 endif
+
+ifeq ($(origin GITLAB_GRAPHQL_ENDPOINT), undefined)
+		echo "Required GITLAB_GRAPHQL_ENDPOINT environment variable missing"
+		exit 1
+endif
+
 	echo "Application run: $(OPTIONS)"
-	GITLAB_GRAPHQL_ENDPOINT="http://localhost:8080/api/graphql" python main.py
+	python main.py
 
 test: ## Builds and then runs tests against the application
+	pytest -vrP ./tests 
 
 prod: ## Runs the prod version of the application
-	$(MAKE) command OPTIONS="-p 8080"
+	$(MAKE) command
 
 dev: ## Runs a dev version of the application
-	$(MAKE) command
+	GITLAB_GRAPHQL_ENDPOINT="http://localhost:8080/api/graphql" $(MAKE) command
 
 generate-report: ## Runs the jupyter notebook and generates the resultant repot
 	jupyter nbconvert --to html --no-input --output ./data/analysis.html ./analysis.ipynb

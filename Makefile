@@ -14,7 +14,7 @@ helper: # Adapted from: https://marmelab.com/blog/2016/02/29/auto-documented-mak
 
 command:
 ifeq ($(origin GITLAB_TOKEN), undefined)
-		echo "Required GILAB_TOKEN environment variable missing"
+		echo "Required GITLAB_TOKEN environment variable missing"
 		exit 1
 endif
 

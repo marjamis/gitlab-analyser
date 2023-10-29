@@ -11,10 +11,14 @@ from gql.transport.aiohttp import AIOHTTPTransport
 
 from engine.types import Branch, Commit, Data, PipelineSchedule
 
-# TODO Improve opening off these, such as with a context manager and proper error checking
-groups_and_projects_query = open("queries/groups_and_projects.gql", "r").read()
-project_details_query = open("queries/project_details.gql", "r").read()
-branch_details_query = open("queries/branch_details.gql", "r").read()
+groups_and_projects_query = open("queries/groups_and_projects.gql", "r", encoding="utf-8").read()
+project_details_query = open("queries/project_details.gql", "r", encoding="utf-8").read()
+branch_details_query = open("queries/branch_details.gql", "r", encoding="utf-8").read()
+
+
+class MissingEnvironmentVariable(Exception):
+    def __init__(self, *args):
+        super().__init__(args)
 
 
 def create_gitlab_client() -> Client:
@@ -24,10 +28,10 @@ def create_gitlab_client() -> Client:
 
     url = os.getenv("GITLAB_GRAPHQL_ENDPOINT")
     if url is None:
-        raise Exception("GITLAB_GRAPHQL_ENDPOINT environment variable not specified")
+        raise MissingEnvironmentVariable("GITLAB_GRAPHQL_ENDPOINT environment variable not specified")
     token = os.getenv("GITLAB_TOKEN")
     if token is None:
-        raise Exception("GITLAB_TOKEN environment variable not specified")
+        raise MissingEnvironmentVariable("GITLAB_TOKEN environment variable not specified")
 
     transport = AIOHTTPTransport(
         url=url,
@@ -51,16 +55,26 @@ def make_query(client: Client, query: str, variables: dict | None = None) -> Dic
 
 
 def pager(results: Dict[str, Any], query_type: str) -> Tuple[bool, str]:
+    """A pager for the GitLab GraphQL queries. returns if there is another page, and if so what the continuation token
+    is.
+
+    Args:
+        results (Dict[str, Any]): The data dictionary returned by the graphql client
+        query_type (str): The type of graphql query that is being made
+
+    Returns:
+        Tuple[bool, str]: _description_
+    """
     try:
-        pageInfo = results[query_type]["pageInfo"]
-    except Exception:
+        page_info = results[query_type]["pageInfo"]
+    except KeyError:
         return (False, "")
 
     has_next_page = False
     after = ""
 
-    if pageInfo.get("hasNextPage"):
-        after = pageInfo.get("endCursor")
+    if page_info.get("hasNextPage"):
+        after = page_info.get("endCursor")
         has_next_page = True
 
     return (has_next_page, after)

@@ -103,7 +103,7 @@ def get_csv_rows_pipeline_schedules(data: Data) -> List[List[str]]:
                         pipeline_schedule.nextRunAt,
                         pipeline_schedule.owner.id,
                         pipeline_schedule.owner.username,
-                        pipeline_schedule.owner.publicEmail,
+                        str(pipeline_schedule.owner.publicEmail),
                         pipeline_schedule.owner.state,
                     ]
                 )

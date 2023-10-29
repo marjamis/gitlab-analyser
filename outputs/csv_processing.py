@@ -4,6 +4,7 @@ Processes the provided files and generates CSV outputs.
 
 import pickle
 import csv
+import os
 
 from typing import List
 
@@ -112,37 +113,27 @@ def get_csv_rows_pipeline_schedules(data: Data) -> List[List[str]]:
 
 def create_csv_outputs(
     input_pickle_file: str,
-    branches_csv: str | None = None,
-    pipeline_schedules_csv: str | None = None,
-    projects_csv: str | None = None,
+    output_directory: str,
 ) -> None:
     """
-    Creates CSV outputs from the supplied file/s.
+    Creates CSV outputs from the supplied pickled data.
     """
 
     try:
         file = open(input_pickle_file, "rb")
         groups = pickle.load(file)
 
-        if branches_csv is not None:
-            with open(branches_csv, "w") as csv_file:
+        outputs = [
+            ("branches.csv", get_csv_rows_branches),
+            ("schedules.csv", get_csv_rows_pipeline_schedules),
+            ("projects.csv", get_csv_rows_projects),
+        ]
+
+        for output in outputs:
+            with open(os.path.join(output_directory, output[0]), "w", encoding="utf-8") as csv_file:
                 csv_writer = csv.writer(csv_file)
 
-                for row in get_csv_rows_branches(groups):
-                    csv_writer.writerow(row)
-
-        if pipeline_schedules_csv is not None:
-            with open(pipeline_schedules_csv, "w") as csv_file:
-                csv_writer = csv.writer(csv_file)
-
-                for row in get_csv_rows_pipeline_schedules(groups):
-                    csv_writer.writerow(row)
-
-        if projects_csv is not None:
-            with open(projects_csv, "w") as csv_file:
-                csv_writer = csv.writer(csv_file)
-
-                for row in get_csv_rows_projects(groups):
+                for row in output[1](groups):
                     csv_writer.writerow(row)
 
     except Exception as e:

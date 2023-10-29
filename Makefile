@@ -24,7 +24,7 @@ ifeq ($(origin GITLAB_GRAPHQL_ENDPOINT), undefined)
 endif
 
 	echo "Application run: $(OPTIONS)"
-	python main.py
+	python main.py $(OPTIONS)
 
 test: ## Builds and then runs tests against the application
 	pytest -vrP ./tests 
@@ -33,7 +33,7 @@ prod: ## Runs the prod version of the application
 	$(MAKE) command
 
 dev: ## Runs a dev version of the application
-	GITLAB_GRAPHQL_ENDPOINT="http://localhost:8080/api/graphql" $(MAKE) command
+	GITLAB_GRAPHQL_ENDPOINT="http://localhost:8080/api/graphql" $(MAKE) command OPTIONS="--output-directory='./data/'"
 
 generate-report: ## Runs the jupyter notebook and generates the resultant repot
 	jupyter nbconvert --to html --no-input --output ./data/analysis.html ./analysis.ipynb

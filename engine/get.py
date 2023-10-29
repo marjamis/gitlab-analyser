@@ -4,12 +4,12 @@ Gets data from GitLab and produces objects with the data.
 
 import pickle
 import os
-from typing import Dict, Any
+from typing import Dict, Any, Tuple
 
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 
-from engine.types import Branch, Commit, Group, Data, Project, PipelineSchedule
+from engine.types import Branch, Commit, Data, PipelineSchedule
 
 # TODO Improve opening off these, such as with a context manager and proper error checking
 groups_and_projects_query = open("queries/groups_and_projects.gql", "r").read()
@@ -50,6 +50,22 @@ def make_query(client: Client, query: str, variables: dict | None = None) -> Dic
     )
 
 
+def pager(results: Dict[str, Any], query_type: str) -> Tuple[bool, str]:
+    try:
+        pageInfo = results[query_type]["pageInfo"]
+    except Exception:
+        return (False, "")
+
+    has_next_page = False
+    after = ""
+
+    if pageInfo.get("hasNextPage"):
+        after = pageInfo.get("endCursor")
+        has_next_page = True
+
+    return (has_next_page, after)
+
+
 def pickle_and_save(output_pickle_filename: str, groups: Data) -> None:
     """
     Pickles the list of GitLab groups and saves the pickle locally.
@@ -59,15 +75,6 @@ def pickle_and_save(output_pickle_filename: str, groups: Data) -> None:
     pickle.dump(groups, file)
 
 
-def get_value(results: Dict[str, Any], key: str) -> Any:
-    """
-    Returns the value of key under the groups -> pageInfo keys
-
-    TODO this shouldn't be needed by for some reason is
-    """
-    return results["groups"]["pageInfo"][key]
-
-
 def get_groups_and_projects(client: Client, data: Data):
     """Gets the groups and project details.
 
@@ -75,7 +82,6 @@ def get_groups_and_projects(client: Client, data: Data):
         client (Client): The GitLab client
         data (Data): The data structure that stores all the found GitLab information
     """
-    # TODO deal with pagination in each query and make it more seamless than here
     has_next_page = True
     after = ""
     while has_next_page:
@@ -89,10 +95,7 @@ def get_groups_and_projects(client: Client, data: Data):
 
         data.groups.nodes += Data(**results).groups.nodes
 
-        if get_value(results, "hasNextPage"):
-            after = get_value(results, "endCursor")
-        else:
-            has_next_page = False
+        has_next_page, after = pager(results, "groups")
 
 
 def get_additional_project_details(client: Client, data: Data):
@@ -104,19 +107,25 @@ def get_additional_project_details(client: Client, data: Data):
     """
     for group in data.groups.nodes:
         for project in group.projects.nodes:
-            project_details = make_query(
-                client,
-                project_details_query,
-                variables={
-                    "projectFullPath": f"{project.fullPath}",
-                },
-            )
+            has_next_page = True
+            after = ""
+            while has_next_page:
+                project_details = make_query(
+                    client,
+                    project_details_query,
+                    variables={
+                        "projectFullPath": f"{project.fullPath}",
+                        "after": after,
+                    },
+                )
 
-            for branch in project_details["project"]["repository"]["branchNames"]:
-                project.branches.append(Branch(name=branch))
+                for branch in project_details["project"]["repository"]["branchNames"]:
+                    project.branches.append(Branch(name=branch))
 
-            for schedule in project_details["project"]["pipelineSchedules"]["edges"]:
-                project.pipelineSchedules.append(PipelineSchedule(**schedule["node"]))
+                for schedule in project_details["project"]["pipelineSchedules"]["edges"]:
+                    project.pipelineSchedules.append(PipelineSchedule(**schedule["node"]))
+
+                has_next_page, after = pager(project_details, "project")
 
 
 def get_additional_branch_details(client: Client, data: Data):
@@ -129,16 +138,22 @@ def get_additional_branch_details(client: Client, data: Data):
     for group in data.groups.nodes:
         for project in group.projects.nodes:
             for branch in project.branches:
-                branch_details = make_query(
-                    client,
-                    branch_details_query,
-                    variables={
-                        "projectFullPath": f"{project.fullPath}",
-                        "branchName": branch.name,
-                    },
-                )
+                has_next_page = True
+                after = ""
+                while has_next_page:
+                    branch_details = make_query(
+                        client,
+                        branch_details_query,
+                        variables={
+                            "projectFullPath": f"{project.fullPath}",
+                            "branchName": branch.name,
+                            "after": after,
+                        },
+                    )
 
-                branch.lastCommit = Commit(**branch_details["project"]["repository"]["tree"]["lastCommit"])
+                    branch.lastCommit = Commit(**branch_details["project"]["repository"]["tree"]["lastCommit"])
+
+                    has_next_page, after = pager(branch_details, "project")
 
 
 def workflow(output_pickle_filename: str) -> None:

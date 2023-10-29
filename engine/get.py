@@ -1,6 +1,4 @@
-"""
-Gets data from GitLab and produces objects with the data.
-"""
+"""Gets data from GitLab and produces objects with the data."""
 
 import pickle
 import os
@@ -17,6 +15,8 @@ branch_details_query = open("queries/branch_details.gql", "r", encoding="utf-8")
 
 
 class MissingEnvironmentVariable(Exception):
+    """Exception for missing environment variables for the GitLab client."""
+
     def __init__(self, *args):
         super().__init__(args)
 
@@ -44,9 +44,7 @@ def create_gitlab_client() -> Client:
 
 
 def make_query(client: Client, query: str, variables: dict | None = None) -> Dict[str, Any]:
-    """
-    Wrapper to make a GitLab GraphQL query.
-    """
+    """Wrapper to make a GitLab GraphQL query."""
 
     return client.execute(
         gql(query),
@@ -63,7 +61,7 @@ def pager(results: Dict[str, Any], query_type: str) -> Tuple[bool, str]:
         query_type (str): The type of graphql query that is being made
 
     Returns:
-        Tuple[bool, str]: _description_
+        Tuple[bool, str]: Returns a boolean for if there is an additional page, and if so the after token to continue
     """
     try:
         page_info = results[query_type]["pageInfo"]
@@ -81,9 +79,7 @@ def pager(results: Dict[str, Any], query_type: str) -> Tuple[bool, str]:
 
 
 def pickle_and_save(output_pickle_filename: str, groups: Data) -> None:
-    """
-    Pickles the list of GitLab groups and saves the pickle locally.
-    """
+    """Pickles the list of GitLab groups and saves the pickle locally."""
 
     file = open(output_pickle_filename, "wb")
     pickle.dump(groups, file)
@@ -171,8 +167,10 @@ def get_additional_branch_details(client: Client, data: Data):
 
 
 def workflow(output_pickle_filename: str) -> None:
-    """
-    Workflow for all the relevant calls to connect to the server and save out the data.
+    """Workflow for all the relevant calls to connect to the server and save out the data.
+
+    Args:
+        output_pickle_filename (str): The location and filename for the picked data to be stored
     """
 
     client = create_gitlab_client()

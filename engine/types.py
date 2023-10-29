@@ -1,15 +1,11 @@
-"""
-Types for GitLab items.
-"""
+"""Types for GitLab items."""
 
 from typing import List
 from pydantic import BaseModel
 
 
 class User(BaseModel):
-    """
-    GitLab User.
-    """
+    """GitLab User."""
 
     id: str
     username: str
@@ -18,9 +14,7 @@ class User(BaseModel):
 
 
 class PipelineSchedule(BaseModel):
-    """
-    GitLab Pipeline Schedule.
-    """
+    """GitLab Pipeline Schedule."""
 
     id: str
     description: str
@@ -30,9 +24,7 @@ class PipelineSchedule(BaseModel):
 
 
 class Commit(BaseModel):
-    """
-    GitLab Commit.
-    """
+    """GitLab Commit."""
 
     title: str
     authoredDate: str
@@ -40,9 +32,7 @@ class Commit(BaseModel):
 
 
 class Branch(BaseModel):
-    """
-    GitLab Branch.
-    """
+    """GitLab Branch."""
 
     name: str
     lastCommit: Commit = Commit(title="", authoredDate="", authorName="")
@@ -55,9 +45,7 @@ class RepositoryDetails(BaseModel):
 
 
 class Project(BaseModel):
-    """
-    GitLab Project.
-    """
+    """GitLab Project."""
 
     id: str
     name: str
@@ -72,13 +60,13 @@ class Project(BaseModel):
 
 
 class Projects(BaseModel):
+    """GitLab Projects."""
+
     nodes: List[Project] = []
 
 
 class Group(BaseModel):
-    """
-    GitLab Project Group.
-    """
+    """GitLab Project Group."""
 
     id: str
     name: str
@@ -89,12 +77,12 @@ class Group(BaseModel):
 
 
 class Groups(BaseModel):
+    """GitLab Groups"""
+
     nodes: List[Group] = []
 
 
 class Data(BaseModel):
-    """
-    List of GitLab Project Groups.
-    """
+    """List of GitLab Project Groups."""
 
     groups: Groups = Groups()

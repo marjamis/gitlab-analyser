@@ -5,7 +5,6 @@ from nbconvert.preprocessors.execute import ExecutePreprocessor
 from nbparameterise import extract_parameters, replace_definitions, parameter_values
 
 
-# TODO convert to pick over csv at some point?
 def html_report(jupyter_notebook_location: str, input_csv_directory: str, output_html_location: str):
     """Generates a html file based on the provided Jupyter notebook and saves it.
 

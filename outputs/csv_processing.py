@@ -1,6 +1,4 @@
-"""
-Processes the provided files and generates CSV outputs.
-"""
+"""Processes the provided files and generates CSV outputs."""
 
 import pickle
 import csv
@@ -12,9 +10,7 @@ from engine.types import Data
 
 
 def get_csv_rows_projects(data: Data) -> List[List[str]]:
-    """
-    Generates the CSV rows for projects across all the provided GitLab groups.
-    """
+    """Generates the CSV rows for projects across all the provided GitLab groups."""
 
     project_details = [
         [
@@ -38,9 +34,7 @@ def get_csv_rows_projects(data: Data) -> List[List[str]]:
 
 
 def get_csv_rows_branches(data: Data) -> List[List[str]]:
-    """
-    Generates the CSV rows for branches across all the provided GitLab groups.
-    """
+    """Generates the CSV rows for branches across all the provided GitLab groups."""
 
     branch_details = [
         [
@@ -71,9 +65,7 @@ def get_csv_rows_branches(data: Data) -> List[List[str]]:
 
 
 def get_csv_rows_pipeline_schedules(data: Data) -> List[List[str]]:
-    """
-    Generates the CSV rows for pipeline schedules across all the provided GitLab groups.
-    """
+    """Generates the CSV rows for pipeline schedules across all the provided GitLab groups."""
 
     pipeline_schedule_details = [
         [
@@ -115,9 +107,7 @@ def create_csv_outputs(
     input_pickle_file: str,
     output_directory: str,
 ) -> None:
-    """
-    Creates CSV outputs from the supplied pickled data.
-    """
+    """Creates CSV outputs from the supplied pickled data."""
 
     try:
         file = open(input_pickle_file, "rb")

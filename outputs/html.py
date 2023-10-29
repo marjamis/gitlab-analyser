@@ -27,7 +27,7 @@ def html_report(jupyter_notebook_location: str, input_csv_directory: str, output
     html_exporter.exclude_input = True
     html_exporter.exclude_output_prompt = True
 
-    (body, _) = html_exporter.from_notebook_node(notebook)
+    (body, _) = html_exporter.from_notebook_node(new_notebook)
 
     with open(output_html_location, "w", encoding="utf-8") as file:
         file.write(body)

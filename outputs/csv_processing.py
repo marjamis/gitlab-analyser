@@ -130,6 +130,7 @@ def create_csv_outputs(
         ]
 
         for output in outputs:
+            print(f"Saving csv for: {output[0]}")
             with open(os.path.join(output_directory, output[0]), "w", encoding="utf-8") as csv_file:
                 csv_writer = csv.writer(csv_file)
 

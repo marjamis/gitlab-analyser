@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 class User(BaseModel):
     """
-    Type for a GitLab User.
+    GitLab User.
     """
 
     id: str
@@ -19,7 +19,7 @@ class User(BaseModel):
 
 class PipelineSchedule(BaseModel):
     """
-    Type for a GitLab Pipeline Schedule.
+    GitLab Pipeline Schedule.
     """
 
     id: str
@@ -31,7 +31,7 @@ class PipelineSchedule(BaseModel):
 
 class Commit(BaseModel):
     """
-    Type for a GitLab Commit.
+    GitLab Commit.
     """
 
     title: str
@@ -41,7 +41,7 @@ class Commit(BaseModel):
 
 class Branch(BaseModel):
     """
-    Type for a GitLab Branch.
+    GitLab Branch.
     """
 
     name: str
@@ -49,12 +49,14 @@ class Branch(BaseModel):
 
 
 class RepositoryDetails(BaseModel):
+    """Repository details"""
+
     rootRef: str
 
 
 class Project(BaseModel):
     """
-    Type for a GitLab Project.
+    GitLab Project.
     """
 
     id: str
@@ -75,7 +77,7 @@ class Projects(BaseModel):
 
 class Group(BaseModel):
     """
-    Type for a GitLab Project Group.
+    GitLab Project Group.
     """
 
     id: str
@@ -92,7 +94,7 @@ class Groups(BaseModel):
 
 class Data(BaseModel):
     """
-    Type for a list of GitLab Project Groups.
+    List of GitLab Project Groups.
     """
 
     groups: Groups = Groups()

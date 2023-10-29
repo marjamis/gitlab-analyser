@@ -112,7 +112,6 @@ def get_additional_project_details(client: Client, data: Data):
                 },
             )
 
-            # TODO make into a pydantic type as well for easy referencings?
             for branch in project_details["project"]["repository"]["branchNames"]:
                 project.branches.append(Branch(name=branch))
 
@@ -155,5 +154,4 @@ def workflow(output_pickle_filename: str) -> None:
     get_additional_project_details(client=client, data=data)
     get_additional_branch_details(client=client, data=data)
 
-    print(data.model_dump_json(indent=4))
     pickle_and_save(output_pickle_filename, data)

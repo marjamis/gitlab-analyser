@@ -35,9 +35,6 @@ prod: ## Runs the prod version of the application
 dev: ## Runs a dev version of the application
 	GITLAB_GRAPHQL_ENDPOINT="http://localhost:8080/api/graphql" $(MAKE) command OPTIONS="--output-directory='./data/'"
 
-generate-report: ## Runs the jupyter notebook and generates the resultant repot
-	jupyter nbconvert --to html --no-input --output ./data/analysis.html ./analysis.ipynb
-
 gitlab: ## Start the sample gitlab to be used for development work
 	docker start gitlab || mkdir -p $(GITLAB_HOME) && \
 	docker run --detach \
